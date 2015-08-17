@@ -1,0 +1,34 @@
+@(stream: Call, post: Call)(implicit request: RequestHeader)
+
+@main("Welcome to Play") {
+
+    <div class="log"></div>
+    <input type="text" name="message" placeholder="Your message"/>
+
+    <script>
+        var user = prompt("What should be your username?");
+
+        jQuery('input').on('keyup', function(e){
+            if ( e.keyCode != 13 ) {
+                return;
+            }
+
+            var m = { message: this.value, user: user };
+
+            this.value = "";
+
+            jQuery.ajax({
+                url: "@post.toString()",
+                data: JSON.stringify(m),
+                method: "POST",
+                contentType: "application/json"
+            });
+        });
+
+        var feed = new EventSource("@stream.absoluteURL()");
+        feed.addEventListener("message", function(msg){
+            var m = JSON.parse(msg.data);
+            jQuery(".log").append('<div class="message">' + m.user + ': ' + m.message + '</div>');
+        });
+    </script>
+}
